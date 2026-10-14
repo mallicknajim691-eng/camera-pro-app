@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Camera Pro</title>
+<style>
+:root{--bg:#0b0d10;--panel:#16191d;--text:#eef0f2;--muted:#9aa3af;--accent:#3b82f6;--line:#2a2f36}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%}
+.viewfinder{position:relative;flex:1;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+video{width:100%;height:100%;object-fit:cover}
+video.mirror{transform:scaleX(-1)}
+canvas{display:none}
+.grid{position:absolute;inset:0;pointer-events:none;display:none}
+.grid.on{display:block}
+.gline{position:absolute;background:rgba(255,255,255,.35)}
+.topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;background:linear-gradient(rgba(0,0,0,.5),transparent);z-index:3}
+.topbar button{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:20px;padding:8px 12px;font-size:13px}
+.flash-note{font-size:11px;color:var(--muted)}
+.countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:90px;font-weight:700;
+  color:#fff;text-shadow:0 0 20px rgba(0,0,0,.6);z-index:4}
+.countdown.on{display:flex}
+.flashbang{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5}
+.flashbang.go{animation:flashfx .25s ease-out}
+@keyframes flashfx{0%{opacity:.9}100%{opacity:0}}
+.controls{background:var(--panel);padding:10px 12px}
+.row{display:flex;gap:8px;overflow-x:auto;padding:6px 0}
+.chip{flex:none;background:#20242a;border:1px solid var(--line);color:var(--text);border-radius:18px;padding:8px 14px;font-size:13px;white-space:nowrap}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.sliderow{display:flex;align-items:center;gap:10px;padding:6px 4px;font-size:12px;color:var(--muted)}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.shutterrow{display:flex;align-items:center;justify-content:space-between;padding:12px 10px 4px}
+.sidebtn{background:#20242a;border:0;color:#fff;border-radius:50%;width:48px;height:48px;font-size:18px;display:flex;align-items:center;justify-content:center}
+.shutter{width:72px;height:72px;border-radius:50%;background:#fff;border:5px solid #666;flex:none}
+.shutter:active{background:#ddd}
+.modeTabs{display:flex;justify-content:center;gap:24px;padding:4px 0 2px;font-size:13px;color:var(--muted)}
+.modeTabs span{padding:4px 2px;border-bottom:2px solid transparent}
+.modeTabs span.active{color:#fff;border-color:#fff;font-weight:600}
+#msg{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;font-size:12px;z-index:4;pointer-events:none}
+.thumbRow{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
+.thumbRow img{height:54px;border-radius:8px;border:1px solid var(--line)}
+.sectionLabel{font-size:11px;color:var(--muted);padding:4px 4px 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="viewfinder" id="vf">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="grid" id="grid"></div>
+    <div class="topbar">
+      <button id="flashBtn">⚡ Off</button>
+      <span class="flash-note" id="camLabel">Back cam</span>
+      <button id="switchCam">🔄 Flip</button>
+    </div>
+    <div class="countdown" id="countdown"></div>
+    <div class="flashbang" id="flashbang"></div>
+    <div id="msg"></div>
+  </div>
+
+  <div class="controls">
+    <div class="modeTabs">
+      <span id="tabPhoto" class="active">PHOTO</span>
+      <span id="tabVideo">VIDEO</span>
+    </div>
+
+    <div class="sectionLabel">Filters</div>
+    <div class="row" id="filterRow">
+      <div class="chip active" data-f="none">Normal</div>
+      <div class="chip" data-f="bw">B&amp;W</div>
+      <div class="chip" data-f="sepia
